@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:10.6
+    command: -c fsync=off -c full_page_writes=off
+    environment:
+      POSTGRES_DB: project
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+      start_period: 5s
+  app:
+    image: app
+    environment:
+      DB_NAME: project
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      FLASK_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
